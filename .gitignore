@@ -1,0 +1,10 @@
+# raw data
+data/*
+
+# python cache files
+__pycache__/*
+*.pyc
+
+# editor files
+.vscode
+

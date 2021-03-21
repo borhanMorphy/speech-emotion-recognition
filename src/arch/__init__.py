@@ -1,0 +1,1 @@
+from .naive_cnn.module import NaiveCNN

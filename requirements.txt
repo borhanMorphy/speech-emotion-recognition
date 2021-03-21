@@ -1,0 +1,4 @@
+pytorch-lightning
+torch>=1.7.1
+librosa
+matplotlib
