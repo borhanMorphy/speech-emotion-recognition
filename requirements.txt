@@ -2,3 +2,4 @@ pytorch-lightning
 torch>=1.7.1
 librosa
 matplotlib
+PyYAML~=5.3.1

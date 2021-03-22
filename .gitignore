@@ -8,3 +8,6 @@ __pycache__/*
 # editor files
 .vscode
 
+# pytorch lightning
+lightning_logs/*
+checkpoints/*
