@@ -34,10 +34,12 @@ python calc_label_dist.py --dataset emodb
 ```script
 python visualize_features.py --dataset emodb --sample-rate 22050 --n-fft 2048 --hop-length 512 --n-mfcc 13
 ```
-<img src="resources/data_analysis/happy.png" width="20%">
-<img src="resources/data_analysis/angry.png" width="20%">
-<img src="resources/data_analysis/neutral.png" width="20%">
-<img src="resources/data_analysis/sad.png" width="20%">
+<p float="left">
+  <img src="resources/data_analysis/happy.png" width="24%">
+  <img src="resources/data_analysis/angry.png" width="24%">
+  <img src="resources/data_analysis/neutral.png" width="24%">
+  <img src="resources/data_analysis/sad.png" width="24%">
+</p>
 
 ## Training
 
