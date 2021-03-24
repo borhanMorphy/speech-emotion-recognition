@@ -4,6 +4,7 @@ data/*
 # python cache files
 __pycache__/*
 *.pyc
+.pytest_cache
 
 # editor files
 .vscode

@@ -25,7 +25,7 @@ class EmodbDataset(Dataset):
         "sad": ["Ta", "Tb", "Tc", "Td"]
     }
 
-    def __init__(self, root_path: str, transform=None):
+    def __init__(self, root_path: str = './data/emodb', transform=None):
         super().__init__()
         assert os.path.isdir(root_path), "given root path: {} must be directory".format(root_path)
         audio_root_path = os.path.join(root_path, "wav")

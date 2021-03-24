@@ -28,4 +28,4 @@ class SERTrainer:
         self.__model = api.SERModule.build(arch, num_classes=num_classes, **hparams)
 
     def fit(self, train_dl, val_dl=None, test_dl=None):
-        
+        pass

@@ -50,7 +50,7 @@ class SERModule(pl.LightningModule):
         batch = torch.from_numpy(features).unsqueeze(0).unsqueeze(0)
         return batch.to(self.device, self.dtype)
 
-    @torch.no_grad
+    @torch.no_grad()
     def predict(self, raw_audio_signals: Union[np.ndarray, List]):
         # TODO implement here
         batch = self.prepare_batch(raw_audio_signals)
@@ -74,7 +74,7 @@ class SERModule(pl.LightningModule):
         for metric in self.__metrics.values():
             metric.reset()
 
-    @torch.no_grad
+    @torch.no_grad()
     def validation_step(self, batch, batch_idx):
         batch, targets = batch
 
@@ -99,7 +99,7 @@ class SERModule(pl.LightningModule):
         for metric in self.__metrics.values():
             metric.reset()
 
-    @torch.no_grad
+    @torch.no_grad()
     def test_step(self, batch, batch_idx):
         batch, targets = batch
 

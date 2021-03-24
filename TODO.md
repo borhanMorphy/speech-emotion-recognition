@@ -13,26 +13,26 @@
 
 
 # Basic APIs
-- [ ] get arch by name
-- [ ] list archs
+- [x] get arch by name
+- [x] list archs
 - [ ] use given arch if not str
 
-- [ ] get dataset by name
-- [ ] list datasets
+- [x] get dataset by name
+- [x] list datasets
 
-- [ ] get loss by name
-- [ ] list losses
+- [x] get loss by name
+- [x] list losses
 - [ ] use given loss if not str
 
-- [ ] get optimizer by name
-- [ ] list optimizers
+- [x] get optimizer by name
+- [x] list optimizers
 - [ ] use given optimizer
 
-- [ ] get metric by name
-- [ ] list metrics
+- [x] get metric by name
+- [x] list metrics
 
-- [ ] get scheduler by name
-- [ ] list schedulers
+- [x] get scheduler by name
+- [x] list schedulers
 - [ ] use given scheduler
 
 # Utility APIs
