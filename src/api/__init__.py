@@ -1,5 +1,6 @@
 __all__ = [
     "SERModule",
+    "build_from_yaml",
 
     "get_arch_by_name",
     "list_archs",
@@ -20,8 +21,13 @@ __all__ = [
     "list_schedulers"
 ]
 
-from ..module import SERModule
 
+from typing import Tuple
+import os
+import yaml
+import pytorch_lightning as pl
+
+from ..module import SERModule
 from ..arch import (
     get_arch_by_name,
     list_archs
@@ -51,3 +57,40 @@ from ..scheduler import (
     get_scheduler_by_name,
     list_schedulers
 )
+
+from .. import utils
+
+def build_from_yaml(yaml_path: str) -> Tuple[pl.LightningModule, pl.Trainer]:
+    """Builds model and trainer using given yaml file path
+
+    Args:
+        yaml_path (str): path of the yaml file
+
+    Returns:
+        Tuple[pl.LightningModule, pl.Trainer]: model and trainer
+    """
+    assert os.path.isfile(yaml_path), "given file {} is not exists".format(yaml_path)
+    assert yaml_path.endswith(".yaml") or yaml_path.endswith(".yml"), "given file {} must be yaml".format(yaml_path)
+    with open(yaml_path, "r") as foo:
+        configs = yaml.load(foo, Loader=yaml.FullLoader)
+
+    assert "arch" in configs, "yaml must contain `arch` key"
+    assert "hparams" in configs, "yaml must contain `hparams` key"
+    assert "trainer" in configs, "yaml must contain `trainer` key"
+
+    arch = configs["arch"]
+    hparams = configs["hparams"]
+    metrics = configs.get("metrics", {})
+    trainer_configs = configs["trainer"]
+
+    if "checkpoint" in trainer_configs:
+        checkpoint_configs = trainer_configs.pop("checkpoint")
+        checkpoint_configs["filename"] = checkpoint_configs["filename"].format(arch=arch)
+        trainer_configs["callbacks"] = pl.callbacks.ModelCheckpoint(
+            **checkpoint_configs
+        )
+
+    model = SERModule.build(arch, hparams, metrics)
+    trainer = pl.Trainer(**trainer_configs)
+
+    return (model, trainer)

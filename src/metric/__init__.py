@@ -1,7 +1,18 @@
 from typing import List
-from pytorch_lightning.metrics import Metric
+from pytorch_lightning.metrics import (
+    Metric,
+    Accuracy,
+    Precision,
+    Recall,
+    F1
+)
 
-__metric_mapper__ = {}
+__metric_mapper__ = {
+    "accuracy": Accuracy,
+    "precision": Precision,
+    "recall": Recall,
+    "f1": F1
+}
 
 def list_metrics() -> List[str]:
     """Returns list of available metrics names
@@ -11,7 +22,7 @@ def list_metrics() -> List[str]:
 
     >>> import src
     >>> src.list_metrics()
-    []
+    ['accuracy','f1','precision','recall']
     """
     return sorted(__metric_mapper__.keys())
 

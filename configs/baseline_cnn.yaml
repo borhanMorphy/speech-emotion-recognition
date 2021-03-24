@@ -1,17 +1,37 @@
-model:
-  arch: "NaiveCNN"
+arch: "NaiveCNN"
+
+metrics:
+  accuracy:
+    kwargs:
+      compute_on_step: false
+  precision:
+    kwargs:
+      num_classes: 4
+      average: "macro"
+      compute_on_step: false
+  recall:
+    kwargs:
+      num_classes: 4
+      average: "macro"
+      compute_on_step: false
+  f1:
+    args: [4]
+    kwargs:
+      average: "macro"
+      compute_on_step: false
+
+hparams:
   kwargs:
     num_classes: 4
+
+  lr: 0.0005
 
   loss:
     name: "Cross Entropy"
     id: "CE"
 
-  metrics: ["accuracy", "precision", "recall", "f1"]
-
   optimizer:
     id: "adam"
-    lr: 0.0005
     weight_decay: 0
 
   scheduler:
@@ -24,14 +44,13 @@ trainer:
   gradient_clip_val: 0
   precision: 32
   profiler: null
-  auto_lr_find: false
   check_val_every_n_epoch: 1
   default_root_dir: "./"
 
   checkpoint:
     verbose: true
     dirpath: "./checkpoints"
-    monitor: "accuracy"
+    monitor: "metrics/accuracy"
     mode: "max"
     save_top_k: 3
-    filename: "{arch}_{{epoch:02d}}_{{val_loss:.3f}}_{{accuracy:.2f}}"
+    filename: "{arch}_{{epoch:02d}}_{{loss/val:.3f}}_{{metrics/accuracy:.2f}}"

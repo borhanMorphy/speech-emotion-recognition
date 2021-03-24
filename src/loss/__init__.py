@@ -1,7 +1,9 @@
 from typing import List
 import torch.nn as nn
 
-__loss_mapper__ = {}
+__loss_mapper__ = {
+    "CE": nn.CrossEntropyLoss
+}
 
 def list_losses() -> List[str]:
     """Returns list of available losss names
@@ -11,7 +13,7 @@ def list_losses() -> List[str]:
 
     >>> import src
     >>> src.list_losses()
-    []
+    ['CE']
     """
     return sorted(__loss_mapper__.keys())
 

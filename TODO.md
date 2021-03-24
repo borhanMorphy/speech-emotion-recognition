@@ -1,6 +1,6 @@
 - [ ] log hyperparameters into tensorboard using [this](https://pytorch.org/docs/stable/tensorboard.html#torch.utils.tensorboard.writer.SummaryWriter.add_hparams)
 - [x] build a yaml structure for hyperparameters
-- [ ] integrate yaml with Trainer and LightningModule
+- [x] integrate yaml with Trainer and LightningModule
 - [x] implement `LightningModule.build` function
 - [ ] implement `LightningModule.from_checkpoint` function
 - [ ] implement `LightningModule.from_pretrained` function (does not include optimizer and scheduler step, and downloads the weights)
@@ -38,3 +38,8 @@
 # Utility APIs
 - [ ] pick best checkpoint api
 - [ ] downsample given dataset
+
+# Other
+- [ ] handle checkpoint save name with "/"
+- [ ] add argparser to train.py
+- [ ] add auto download functionality for datasets

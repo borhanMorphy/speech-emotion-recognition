@@ -12,22 +12,29 @@ from . import api
 
 class SERModule(pl.LightningModule):
 
-    def __init__(self, arch: nn.Module, hparams: Dict = None):
+    def __init__(self, arch: nn.Module, hparams: Dict = {}, metrics: Dict = {}):
         super().__init__()
+        # save hyper parameters
         self.save_hyperparameters(hparams)
 
         # set architecture
         self.__arch = arch
 
+        # initialize metrics
+        self.__metrics = {}
+        for metric, values in metrics.items():
+            if values is None:
+                values = {}
+            args = values.get("args", ())
+            kwargs = values.get("kwargs", {})
+            self.add_metric(
+                metric,
+                api.get_metric_by_name(metric, *args, **kwargs))
+        
         # initialize loss
         self.__loss_fn = api.get_loss_by_name(
             hparams.get("loss", {"id": "CE"}).get("id")
         )
-
-        # initialize metrics
-        self.__metrics = {}
-        for metric in hparams.get("metrics", []):
-            self.add_metric(metric, api.get_metric_by_name(metric))
 
     def add_metric(self, name:str, metric:pl.metrics.Metric):
         self.__metrics[name] = metric
@@ -37,9 +44,6 @@ class SERModule(pl.LightningModule):
         if isinstance(loss, str):
             loss = api.get_loss_by_name(loss)
         self.__loss_fn = loss
-
-    # TODO def set_optimizer(self) hint: use getter and setter
-    # TODO def set_scheduler(self) hint: use getter and setter
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.__arch.forward(x)
@@ -53,22 +57,25 @@ class SERModule(pl.LightningModule):
     @torch.no_grad()
     def predict(self, raw_audio_signals: Union[np.ndarray, List]):
         # TODO implement here
-        batch = self.prepare_batch(raw_audio_signals)
-
-        logits = self.forward(batch)
-
-        scores, preds = logits.max(dim=1)
-
         return 
+
+    def on_train_epoch_start(self):
+        # TODO log hyperparameters/lr
+        pass
 
     def training_step(self, batch, batch_idx):
         batch, targets = batch
 
-        logits = self.forward(batch.to(self.device, self.dtype))
+        logits = self.forward(batch)
 
-        loss = self.__loss_fn(logits, targets.to(self.device))
+        loss = self.__loss_fn(logits, targets)
 
         return loss
+
+    def on_train_epoch_end(self, outputs):
+        losses = [output["minimize"] for output in outputs[0][0]]
+        mean_loss = sum(losses) / len(losses)
+        self.log("loss/train", mean_loss.item())
 
     def on_validation_epoch_start(self):
         for metric in self.__metrics.values():
@@ -78,22 +85,23 @@ class SERModule(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         batch, targets = batch
 
-        logits = self.forward(batch.to(self.device, self.dtype))
+        logits = self.forward(batch)
 
-        preds = F.softmax(logits, dim=1).cpu().argmax(dim=1)
+        preds = F.softmax(logits, dim=1).argmax(dim=1)
 
-        loss = self.__loss_fn(logits, targets.to(self.device))
+        loss = self.__loss_fn(logits, targets)
 
         for metric in self.__metrics.values():
-            metric(preds, targets)
+            metric(preds.cpu(), targets.cpu())
 
         return loss.item()
 
     def validation_epoch_end(self, val_outputs: List):
         loss = sum(val_outputs)/len(val_outputs)
+        
         for key, metric in self.__metrics.items():
-            self.log(key, metric.compute())
-        self.log('val_loss', loss)
+            self.log("metrics/{}".format(key), metric.compute())
+        self.log('loss/val', loss)
 
     def on_test_start(self):
         for metric in self.__metrics.values():
@@ -103,14 +111,14 @@ class SERModule(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         batch, targets = batch
 
-        logits = self.forward(batch.to(self.device, self.dtype))
+        logits = self.forward(batch)
 
-        preds = F.softmax(logits, dim=1).cpu().argmax(dim=1)
+        preds = F.softmax(logits, dim=1).argmax(dim=1)
 
-        loss = self.__loss_fn(logits, targets.to(self.device))
+        loss = self.__loss_fn(logits, targets)
 
         for metric in self.__metrics.values():
-            metric(preds, targets)
+            metric(preds.cpu(), targets.cpu())
 
         return loss.item()
 
@@ -118,23 +126,44 @@ class SERModule(pl.LightningModule):
         loss = sum(test_outputs)/len(test_outputs)
         for key, metric in self.__metrics.items():
             self.log(key, metric.compute())
-        self.log('test_loss', loss)
+        self.log('loss/test', loss)
 
     def configure_optimizers(self):
-        pass
+
+        # initialize optimizer
+        optimizer_cfg = self.hparams.get("optimizer", {"id": "adam", "lr": 1e-3, "weight_decay": 0}).copy()
+        optimizer_name = optimizer_cfg.pop("id")
+        optimizer_cfg.update({"lr": self.hparams.lr})
+        optimizer = api.get_optimizer_by_name(
+            self.parameters(), optimizer_name, **optimizer_cfg
+        )
+
+        # initialize scheduler
+        scheduler_cfg = self.hparams.get("scheduler", {"id": None}).copy()
+        scheduler = None
+        if ("id" in scheduler_cfg) and (scheduler_cfg["id"] is not None):
+            scheduler_name = scheduler_cfg.pop("id")
+            scheduler = api.get_scheduler_by_name(
+                optimizer, scheduler_name, **scheduler_cfg)
+
+        if scheduler is None:
+            return optimizer
+        else:
+            return [optimizer], [scheduler]
 
     @classmethod
-    def build(cls, arch: Union[str, nn.Module], **hparams) -> pl.LightningModule:
+    def build(cls, arch: Union[str, nn.Module], hparams: Dict, metrics: Dict) -> pl.LightningModule:
         assert isinstance(arch, (str, nn.Module)), "architecture must be eather string or nn.Module but found {}".format(type(arch))
         if isinstance(arch, str):
             arch = api.get_arch_by_name(arch, **hparams.get("kwargs", {}))
-        return cls(arch, hparams)
+        return cls(arch, hparams, metrics)
 
     # TODO from_pretrained()
     # TODO from_checkpoint()
 
     def on_load_checkpoint(self, checkpoint: Dict):
         print(checkpoint)
+        # TODO implement here
         # checkpoint['hyper_parameters']
 
         # get architecture nn.Module class

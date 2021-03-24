@@ -2,16 +2,16 @@ from typing import List, Dict
 import matplotlib.pyplot as plt
 import librosa
 from tqdm import tqdm
-from src.dataset import EmodbDataset
+import argparse
 
-# TODO select dataset via argparse
+import src
 
 def extract_time(audio_files_path: str) -> float:
     signal, sr = librosa.load(audio_files_path)
     return signal.shape[0] / sr
 
-def calc_time(root_path: str) -> Dict[str, List[float]]:
-    ds = EmodbDataset(root_path)
+def calc_time(dataset: str) -> Dict[str, List[float]]:
+    ds = src.get_dataset_by_name(dataset)
 
     vals = {label: [] for label in ds.get_labels()}
 
@@ -29,10 +29,9 @@ def get_sizes(root_path: str) -> Dict[str, float]:
 
     return vals
 
-def main():
+def main(dataset: str):
 
-    dataset_path = "./data/emodb"
-    labels, sizes = zip(*[(k,v) for k,v in get_sizes(dataset_path).items()])
+    labels, sizes = zip(*[(k,v) for k,v in get_sizes(dataset).items()])
     explode = tuple((0.1 for _ in labels))
 
     total_time = sum(sizes)
@@ -46,6 +45,8 @@ def main():
 
     plt.show()
 
-
 if __name__ == '__main__':
-    main()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dataset", "-ds", type=str, required=True, choices=src.list_datasets())
+    args = ap.parse_args()
+    main(args.dataset)

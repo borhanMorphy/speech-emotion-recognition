@@ -18,6 +18,27 @@ pip install -r requirements.txt
 
 ## Data Analysis
 
+### Min & Mean & Max Audio Length For Each Emotion
+```script
+python calc_data_length.py --dataset emodb
+```
+<img src="resources/data_analysis/min_mean_max.png" width="50%">
+
+### Check Label Distribution For Each Emotion
+```script
+python calc_label_dist.py --dataset emodb
+```
+<img src="resources/data_analysis/label_distribution.png" width="50%">
+
+### Visualize Random Audio Features For Each Emotion
+```script
+python visualize_features.py --dataset emodb --sample-rate 22050 --n-fft 2048 --hop-length 512 --n-mfcc 13
+```
+<img src="resources/data_analysis/happy.png" width="20%">
+<img src="resources/data_analysis/angry.png" width="20%">
+<img src="resources/data_analysis/neutral.png" width="20%">
+<img src="resources/data_analysis/sad.png" width="20%">
+
 ## Training
 
 ## Pre-Trained Model Usage
