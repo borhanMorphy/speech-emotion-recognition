@@ -52,5 +52,5 @@ trainer:
     dirpath: "./checkpoints"
     monitor: "metrics/accuracy"
     mode: "max"
-    save_top_k: 3
-    filename: "{arch}_{{epoch:02d}}_{{loss/val:.3f}}_{{metrics/accuracy:.2f}}"
+    save_top_k: 1
+    filename: "{arch}_best"

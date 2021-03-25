@@ -60,11 +60,12 @@ from ..scheduler import (
 
 from .. import utils
 
-def build_from_yaml(yaml_path: str) -> Tuple[pl.LightningModule, pl.Trainer]:
+def build_from_yaml(yaml_path: str, resume: bool = False) -> Tuple[pl.LightningModule, pl.Trainer]:
     """Builds model and trainer using given yaml file path
 
     Args:
         yaml_path (str): path of the yaml file
+        resume (bool): if true than training will be resumed from checkpoint
 
     Returns:
         Tuple[pl.LightningModule, pl.Trainer]: model and trainer
@@ -86,11 +87,16 @@ def build_from_yaml(yaml_path: str) -> Tuple[pl.LightningModule, pl.Trainer]:
     if "checkpoint" in trainer_configs:
         checkpoint_configs = trainer_configs.pop("checkpoint")
         checkpoint_configs["filename"] = checkpoint_configs["filename"].format(arch=arch)
+        ckpt_file_path = os.path.join(checkpoint_configs["dirpath"], checkpoint_configs["filename"] + ".ckpt")
+
         trainer_configs["callbacks"] = pl.callbacks.ModelCheckpoint(
             **checkpoint_configs
         )
+        if resume:
+            trainer_configs.update({"resume_from_checkpoint": ckpt_file_path})
 
     model = SERModule.build(arch, hparams, metrics)
+
     trainer = pl.Trainer(**trainer_configs)
 
     return (model, trainer)

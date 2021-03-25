@@ -42,6 +42,22 @@ python visualize_features.py --dataset emodb --sample-rate 22050 --n-fft 2048 --
 </p>
 
 ## Training
+Using [train.py](train.py) script
+```script
+python train.py -y configs/baseline_cnn.yaml -bs 32 -ds emodb
+```
+
+Also training can be resumable with --resume flag
+```script
+python train.py -y configs/baseline_cnn.yaml -bs 32 -ds emodb --resume
+```
+
+For tensorboard view run the following and visit http://localhost:6006
+```script
+tensorboard serve --logdir lightning_logs
+```
+
+Checkpoints will be saved under the `./checkpoints/`
 
 ## Pre-Trained Model Usage
 

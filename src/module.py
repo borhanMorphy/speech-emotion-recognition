@@ -12,7 +12,7 @@ from . import api
 
 class SERModule(pl.LightningModule):
 
-    def __init__(self, arch: nn.Module, hparams: Dict = {}, metrics: Dict = {}):
+    def __init__(self, arch: nn.Module = None, hparams: Dict = {}, metrics: Dict = {}):
         super().__init__()
         # save hyper parameters
         self.save_hyperparameters(hparams)
@@ -156,22 +156,6 @@ class SERModule(pl.LightningModule):
         assert isinstance(arch, (str, nn.Module)), "architecture must be eather string or nn.Module but found {}".format(type(arch))
         if isinstance(arch, str):
             arch = api.get_arch_by_name(arch, **hparams.get("kwargs", {}))
-        return cls(arch, hparams, metrics)
+        return cls(arch=arch, hparams=hparams, metrics=metrics)
 
     # TODO from_pretrained()
-    # TODO from_checkpoint()
-
-    def on_load_checkpoint(self, checkpoint: Dict):
-        print(checkpoint)
-        # TODO implement here
-        # checkpoint['hyper_parameters']
-
-        # get architecture nn.Module class
-        # arch_cls = get_arch_cls(arch)
-
-        # get architecture configuration if needed
-        # config = config if isinstance(config,Dict) else get_arch_config(arch,config)
-
-        # build nn.Module with given configuration
-        # self.arch  = arch_cls(config=config, **kwargs)
-        pass
